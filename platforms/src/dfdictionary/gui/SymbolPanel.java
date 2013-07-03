@@ -1,0 +1,239 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/*
+ * SymbolPanel.java
+ *
+ * Created on Aug 18, 2011, 11:21:19 AM
+ */
+package dfdictionary.gui;
+
+import dfdictionary.object.DFSymbol;
+import dfdictionary.object.DFWord;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.ListSelectionModel;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author tvarney
+ */
+public class SymbolPanel extends javax.swing.JPanel
+    implements ListSelectionListener, ActionListener {
+    
+    private Map<String, DFSymbol> symbols;
+    private Map<String, DFWord> words;
+    private DFSymbol selected_sym;
+    private DFWord selected_word;
+    
+    /** Creates new form SymbolPanel */
+    public SymbolPanel() {
+        initComponents();
+        jList1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jList2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        symbols = new HashMap<String, DFSymbol>();
+        updateSymList(); //< Ignore warning -. -
+        
+        jList1.addListSelectionListener(this);   //< Ignore warnings here
+        jList2.addListSelectionListener(this);   //< These statements are not
+        addSymButton.addActionListener(this);    //< 'leaky', the element is
+        removeSymButton.addActionListener(this); //< constructed at this point,
+        addWordButton.addActionListener(this);   //< we are just adding
+        removeWordButton.addActionListener(this);//< it as a listener.
+    }
+    
+    protected void updateSymList() {
+        Object[] syms = {};
+        
+        if(symbols != null && symbols.size() > 0) {
+            Object[] blah = symbols.values().toArray();
+            if(blah != null) {
+                syms = blah;
+            }
+        }
+        
+        jList1.setListData(syms);
+    }
+    protected void updateWordList() {
+        Object[] warr = {};
+        
+        if(selected_sym != null) {
+            warr = selected_sym.wordArray();
+        }
+        
+        jList2.setListData(warr);
+    }
+    
+    protected void setData(Map<String, DFSymbol> symbols,
+                           Map<String, DFWord> words) {
+        this.symbols = symbols;
+        this.words = words;
+        
+        selected_sym  = null;
+        selected_word = null;
+        
+        updateSymList();
+    }
+    
+    @Override
+    public void valueChanged(ListSelectionEvent lse) {
+        if(lse.getSource() == jList1) {
+            /* Change our currently selected symbol */
+            selected_sym = (DFSymbol)jList1.getSelectedValue();
+            
+            System.out.printf("Setting current symbol to %s\n",
+                              selected_sym.tag);
+            
+            updateWordList();
+            selected_word = null;
+        }else if(lse.getSource() == jList2) {
+            /* Set our current word entry */
+            String s = (String)jList2.getSelectedValue();
+            if(s == null) {
+                selected_word = null;
+                return;
+            }
+            selected_word = words.get(s); //< Put this in a try/catch?
+        }
+    }
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if(ae.getSource() == addWordButton) {
+            if(selected_sym == null) {
+                return;
+            }
+            
+            String s = JOptionPane.showInputDialog(this, "Word:");
+            if(s != null && words.containsKey(s)) {
+                selected_sym.add(s);
+                words.get(s).add(selected_sym.tag);
+                updateWordList();
+            }else {
+                JOptionPane.showMessageDialog(this, "Specified word does not exist.");
+            }
+        }else if(ae.getSource() == removeWordButton) {
+            if(selected_word == null) {
+                return;
+            }
+            
+            selected_word.remove(selected_sym.tag);
+            
+            updateWordList();
+            
+            selected_word = null;
+        }else if(ae.getSource() == addSymButton) {
+            String s = JOptionPane.showInputDialog(this, "Symbol:");
+            if(!symbols.containsKey(s)) {
+                symbols.put(s, new DFSymbol(s));
+                updateSymList();
+            }
+        }else if(ae.getSource() == removeSymButton) {
+            if(selected_sym == null) {
+                return;
+            }
+            
+            symbols.remove(selected_sym.tag);
+            selected_sym = null;
+            selected_word = null;
+            updateSymList();
+        }
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jList2 = new javax.swing.JList();
+        addSymButton = new javax.swing.JButton();
+        removeSymButton = new javax.swing.JButton();
+        removeWordButton = new javax.swing.JButton();
+        addWordButton = new javax.swing.JButton();
+
+        jList1.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(jList1);
+
+        jList2.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane2.setViewportView(jList2);
+
+        addSymButton.setText("+");
+
+        removeSymButton.setText("-");
+
+        removeWordButton.setText("-");
+
+        addWordButton.setText("+");
+
+        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createSequentialGroup()
+                        .add(addSymButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 41, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(removeSymButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 40, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 94, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(18, 18, 18)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 97, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(layout.createSequentialGroup()
+                        .add(addWordButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 41, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(removeWordButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 40, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(39, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane1)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
+                .add(6, 6, 6)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(addSymButton)
+                    .add(removeSymButton)
+                    .add(addWordButton)
+                    .add(removeWordButton))
+                .addContainerGap())
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addSymButton;
+    private javax.swing.JButton addWordButton;
+    private javax.swing.JList jList1;
+    private javax.swing.JList jList2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton removeSymButton;
+    private javax.swing.JButton removeWordButton;
+    // End of variables declaration//GEN-END:variables
+}
